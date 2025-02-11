@@ -22,3 +22,4 @@ app.listen(port, () =>{  //app vai escutar a "port" q estiver rodando
 })
 
 //pra rodar é "node nomedoarquivo" aqui no caso seria "node server.js"
+//pra configurar o email e username no github é "git config user.name 'tawonat'" e "git config user.email 'taloswi@gmail.com'"
