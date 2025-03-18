@@ -58,6 +58,34 @@ class userService {
       console.log('Erro ao chamar usuário', erro)
     }
   }
+
+  deleteUser(id) { //função pra deletar usuários (ele deleta baseado no ID)
+    try { 
+      if (this.users.some(user => user.id === id)) { //se o usuário não existir, ele vai dar um erro
+   
+        this.users = this.users.filter(user => user.id !== id)//filtra o usuário que eu quero deletar (filtra baseado em ID)
+        this.saveUsers() //salva denovo os usuários, agr com usuario deletado //vai mostrar a mensagem de erro
+      }else{
+        throw new Error('Usuário não encontrado') //mensagem de erro
+      }
+    } catch (erro) {
+      console.log('Erro ao deletar usuário', erro) //me avisa se der erro
+    }
+  }
+
+
+  putUser(id){ //função pra editar usuários
+    try {
+      if (this.users.some(user => user.id === id)) { //se o ID não existir, ele vai dar um erro
+        this.saveUsers() //salva denovo os usuários, agr com usuario atualizado
+      }else{
+        throw new Error('Usuário não encontrado') //mensagem de erro
+      }
+    } catch (erro) {
+      console.log('Erro ao editar usuário', erro) //me avisa se der erro
+    }
+  }
+
 }
 
 module.exports = new userService
