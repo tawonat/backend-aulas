@@ -41,15 +41,23 @@ class userService {
     }
   }
 
+
   async addUser(nome, email, senha, endereço, telefone, cpf) { //função pra adicionar usuários (é async pq ela espera algo acontecer pra continuar)
     try {
+
+      const checaCPF = this.users.some(user => user.cpf === cpf) //"some" retorna true ou false, se tiver algum user com o mesmo cpf, ele vai dar erro)
+      if (checaCPF) {  //se quando checar o cpf, e ele ja existir, ele vai dar erro
+        throw new Error('CPF já cadastrado')
+      }
+
       const senhacriptografada = await bcrypt.hash(senha, 10) //vai receber a senha e criptografar ela, e o 10 é o número de vezes que ele vai criptografar (await é q ele vai esperar a senha ser criptografada pra continuar, ou seja, só cria o user quando criptografar a senha)
       const user = new User(this.nextID++, nome, email, senhacriptografada, endereço, telefone, cpf)  //cria novo user, e o novoid++ é pra toda vez aumentar um no id (em vez de receber senha normal, vai receber ela criptografada)
       this.users.push(user) //da um push pra armazenar esse user no array de usuarios
       this.saveUsers() //to chamando pra depois de criar o usuário, salvar ele
-      return user
+      return user //retorna o usuário
     } catch (erro) {
       console.log('Erro ao cadastrar usuário', erro)
+      throw erro //vai definir "erro", pra erro rodar no postman (basicamente "salva" o erro criado)
     }
   }
 
@@ -76,22 +84,36 @@ class userService {
   }
 
 
-  putUser(id) { //função pra editar usuários
+  putUser(id, nome, email, senha, endereço, telefone, cpf) {
     try {
-      const user = this.users.find(user => user.id === id) //procura o usuário baseado no ID
-      if (!user) throw new Error('Usuário não encontrado') //se o usuário não existir, ele vai dar um erro
-      user.nome = nome //vai alterar o nome do usuário
-      user.email = email //vai alterar o email do usuário
-      user.senha = senha //vai alterar a senha do usuário
-      user.endereço = endereço //vai alterar o endereço do usuário
-      user.telefone = telefone //vai alterar o telefone do usuário
-      user.cpf = cpf //vai alterar o cpf do usuário
-      this.saveUsers() //salva as alterações
-      return user //retorna o usuário
+      const user = this.users.find(user => user.id === id)
+      if (!user) throw new Error('Usuário não encontrado')
+
+          // função que checa se o cpf já existe 
+          if (cpf && cpf !== user.cpf) {
+            const cpfExiste = this.users.some(u => u.cpf === cpf && u.id !== id);
+            if (cpfExiste) {
+                throw new Error('CPF já está em uso por outro usuário');
+            }
+        }
+      
+      // Atualiza o usuário com as novas propriedades (se eles forem inseridos, se não erro)
+      if (nome) user.nome = nome
+      if (email) user.email = email
+      if (senha) user.senha = senha
+      if (endereço) user.endereço = endereço
+      if (telefone) user.telefone = telefone
+      if (cpf) user.cpf = cpf
+
+      this.saveUsers()
+      return user
     } catch (erro) {
-      console.log('Erro ao editar usuário', erro) //mostra o erro
+      console.log('Erro ao editar usuário', erro)
+      throw erro
     }
-}
+  }
+
+
 }
 
 module.exports = new userService

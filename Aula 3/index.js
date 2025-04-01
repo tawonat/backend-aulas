@@ -7,12 +7,16 @@ app.use(express.json()) //ativa o json no express
 
 //rota para usuario ser criado
 app.post("/users", async (req, res) => {
-    const { nome, email, senha, endereço, telefone, cpf } = req.body //passa um arquivo via json pra nome e email
-    if (!nome || !email || !senha || !endereço || !telefone || !cpf) { //caso o nome e o email sejam diferentes de (estejam vazios) vai dar erro
-        return res.status(400).json({ error: "Os campos são obrigatórios" }) //mensagem enviada caso dê erro (nome ou email vazios)
+    try {
+        const { nome, email, senha, endereço, telefone, cpf } = req.body //passa um arquivo via json pra nome e email
+        if (!nome || !email || !senha || !endereço || !telefone || !cpf) { //caso o nome e o email sejam diferentes de (estejam vazios) vai dar erro
+            return res.status(400).json({ error: "Os campos são obrigatórios" }) //mensagem enviada caso dê erro (nome ou email vazios)
+        }
+        const user = await userService.addUser(nome, email, senha, endereço, telefone, cpf) //toda vez q é AWAIT precisa ser async
+        res.status(200).json({ user })
+    } catch (erro) {
+        res.status(401).json({ error: erro.message });
     }
-    const user = await userService.addUser(nome, email, senha, endereço, telefone, cpf) //toda vez q é AWAIT precisa ser async
-    res.status(200).json({ user })
 })
 
 //rota pra listar todos os usuarios
@@ -36,8 +40,6 @@ app.delete("/users/:id", (req, res) => { //deletar users pelo parametro ID (esse
 //rota para atualizar usuários (baseado em ID)
 app.put("/users/:id", (req, res) => {
     const id = parseInt(req.params.id)
-
-
     const { nome, email, senha, endereço, telefone, cpf } = req.body
 
     try {
