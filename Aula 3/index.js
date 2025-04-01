@@ -6,12 +6,12 @@ app.use(express.json()) //ativa o json no express
 
 
 //rota para usuario ser criado
-app.post("/users", (req, res) => {
+app.post("/users", async (req, res) => {
     const { nome, email, senha, endereço, telefone, cpf } = req.body //passa um arquivo via json pra nome e email
     if (!nome || !email || !senha || !endereço || !telefone || !cpf) { //caso o nome e o email sejam diferentes de (estejam vazios) vai dar erro
         return res.status(400).json({ error: "Os campos são obrigatórios" }) //mensagem enviada caso dê erro (nome ou email vazios)
     }
-    const user = userService.addUser(nome, email, senha, endereço, telefone, cpf)
+    const user = await userService.addUser(nome, email, senha, endereço, telefone, cpf) //toda vez q é AWAIT precisa ser async
     res.status(200).json({ user })
 })
 
@@ -26,7 +26,7 @@ app.delete("/users/:id", (req, res) => { //deletar users pelo parametro ID (esse
 
     try {
         userService.deleteUser(id)
-        res.status(200).json({erro}) //retorna mensagem de sucesso DEVITO MUDOU AQUI
+        res.status(200).json('Sucess') //retorna mensagem de sucesso DEVITO MUDOU AQUI
     } catch (erro) {
         res.status(401).json({ error: erro.message }); //retorna mensagem de erro
     }
@@ -36,7 +36,9 @@ app.delete("/users/:id", (req, res) => { //deletar users pelo parametro ID (esse
 //rota para atualizar usuários (baseado em ID)
 app.put("/users/:id", (req, res) => {
     const id = parseInt(req.params.id)
-    const { nome, email, senha, endereço, telefone, cpf } = req.body 
+
+
+    const { nome, email, senha, endereço, telefone, cpf } = req.body
 
     try {
         const updatedUser = userService.putUser(id, nome, email, senha, endereço, telefone, cpf)

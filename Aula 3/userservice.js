@@ -1,6 +1,7 @@
 const User = require("./user")
 const path = require("path") //path cria um caminho virtual que pode ser acessado de qualquer lugar da pasta Aula 3 ou tudo da frente da pasta (caminho relativo) (módulo para manipular caminhos)
 const fs = require("fs") //fs é FileSystem (módulo para manipular arquivos)
+const bcrypt = require('bcryptjs') //bcrypt é uma biblioteca para criptografar senhas
 
 class userService {
   constructor() { //quando não passa parâmetro traz um valor fixo, que não muda
@@ -40,9 +41,10 @@ class userService {
     }
   }
 
-  addUser(nome, email, senha, endereço, telefone, cpf) { //função pra adicionar usuários
+  async addUser(nome, email, senha, endereço, telefone, cpf) { //função pra adicionar usuários (é async pq ela espera algo acontecer pra continuar)
     try {
-      const user = new User(this.nextID++, nome, email, senha, endereço, telefone, cpf)  //cria novo user, e o novoid++ é pra toda vez aumentar um no id
+      const senhacriptografada = await bcrypt.hash(senha, 10) //vai receber a senha e criptografar ela, e o 10 é o número de vezes que ele vai criptografar (await é q ele vai esperar a senha ser criptografada pra continuar, ou seja, só cria o user quando criptografar a senha)
+      const user = new User(this.nextID++, nome, email, senhacriptografada, endereço, telefone, cpf)  //cria novo user, e o novoid++ é pra toda vez aumentar um no id (em vez de receber senha normal, vai receber ela criptografada)
       this.users.push(user) //da um push pra armazenar esse user no array de usuarios
       this.saveUsers() //to chamando pra depois de criar o usuário, salvar ele
       return user
@@ -60,12 +62,12 @@ class userService {
   }
 
   deleteUser(id) { //função pra deletar usuários (ele deleta baseado no ID)
-    try { 
+    try {
       if (this.users.some(user => user.id === id)) { //se o usuário não existir, ele vai dar um erro
-   
+
         this.users = this.users.filter(user => user.id !== id)//filtra o usuário que eu quero deletar (filtra baseado em ID)
         this.saveUsers() //salva denovo os usuários, agr com usuario deletado //vai mostrar a mensagem de erro
-      }else{
+      } else {
         throw new Error('Usuário não encontrado') //mensagem de erro
       }
     } catch (erro) {
@@ -74,18 +76,22 @@ class userService {
   }
 
 
-  putUser(id){ //função pra editar usuários
+  putUser(id) { //função pra editar usuários
     try {
-      if (this.users.some(user => user.id === id)) { //se o ID não existir, ele vai dar um erro
-        this.saveUsers() //salva denovo os usuários, agr com usuario atualizado
-      }else{
-        throw new Error('Usuário não encontrado') //mensagem de erro
-      }
+      const user = this.users.find(user => user.id === id) //procura o usuário baseado no ID
+      if (!user) throw new Error('Usuário não encontrado') //se o usuário não existir, ele vai dar um erro
+      user.nome = nome //vai alterar o nome do usuário
+      user.email = email //vai alterar o email do usuário
+      user.senha = senha //vai alterar a senha do usuário
+      user.endereço = endereço //vai alterar o endereço do usuário
+      user.telefone = telefone //vai alterar o telefone do usuário
+      user.cpf = cpf //vai alterar o cpf do usuário
+      this.saveUsers() //salva as alterações
+      return user //retorna o usuário
     } catch (erro) {
-      console.log('Erro ao editar usuário', erro) //me avisa se der erro
+      console.log('Erro ao editar usuário', erro) //mostra o erro
     }
-  }
-
+}
 }
 
 module.exports = new userService
