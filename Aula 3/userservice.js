@@ -91,7 +91,7 @@ class userService {
 
           // função que checa se o cpf já existe 
           if (cpf && cpf !== user.cpf) {
-            const cpfExiste = this.users.some(u => u.cpf === cpf && u.id !== id);
+            const cpfExiste = this.users.some(u => u.cpf === cpf && u.id !== id); //some e u são funções especiais do JS. pesquisar mais sobre dps (mas basicamente u faz ignorar id)
             if (cpfExiste) {
                 throw new Error('CPF já está em uso por outro usuário');
             }
