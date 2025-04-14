@@ -2,6 +2,7 @@ const User = require("./user")
 const path = require("path") //path cria um caminho virtual que pode ser acessado de qualquer lugar da pasta Aula 3 ou tudo da frente da pasta (caminho relativo) (módulo para manipular caminhos)
 const fs = require("fs") //fs é FileSystem (módulo para manipular arquivos)
 const bcrypt = require('bcryptjs') //bcrypt é uma biblioteca para criptografar senhas
+const mysql = require("./mysql")
 
 class userService {
   constructor() { //quando não passa parâmetro traz um valor fixo, que não muda
@@ -49,12 +50,15 @@ class userService {
       if (checaCPF) {  //se quando checar o cpf, e ele ja existir, ele vai dar erro
         throw new Error('CPF já cadastrado')
       }
-
       const senhacriptografada = await bcrypt.hash(senha, 10) //vai receber a senha e criptografar ela, e o 10 é o número de vezes que ele vai criptografar (await é q ele vai esperar a senha ser criptografada pra continuar, ou seja, só cria o user quando criptografar a senha)
-      const user = new User(this.nextID++, nome, email, senhacriptografada, endereço, telefone, cpf)  //cria novo user, e o novoid++ é pra toda vez aumentar um no id (em vez de receber senha normal, vai receber ela criptografada)
-      this.users.push(user) //da um push pra armazenar esse user no array de usuarios
-      this.saveUsers() //to chamando pra depois de criar o usuário, salvar ele
-      return user //retorna o usuário
+     
+      const resultados = await mysql.execute(
+        `INSERT INTO usuários (Nome, Email, Senha, Endereço, Telefone, CPF)
+          VALUES('?', '?', '?', '?', '?', '?');`
+          [nome, email, senhacriptografada, endereço, telefone, cpf]
+      )
+      return resultados
+
     } catch (erro) {
       console.log('Erro ao cadastrar usuário', erro)
       throw erro //vai definir "erro", pra erro rodar no postman (basicamente "salva" o erro criado)
@@ -89,14 +93,14 @@ class userService {
       const user = this.users.find(user => user.id === id)
       if (!user) throw new Error('Usuário não encontrado')
 
-          // função que checa se o cpf já existe 
-          if (cpf && cpf !== user.cpf) {
-            const cpfExiste = this.users.some(u => u.cpf === cpf && u.id !== id); //some e u são funções especiais do JS. pesquisar mais sobre dps (mas basicamente u faz ignorar id)
-            if (cpfExiste) {
-                throw new Error('CPF já está em uso por outro usuário');
-            }
+      // função que checa se o cpf já existe 
+      if (cpf && cpf !== user.cpf) {
+        const cpfExiste = this.users.some(u => u.cpf === cpf && u.id !== id); //some e u são funções especiais do JS. pesquisar mais sobre dps (mas basicamente u faz ignorar id)
+        if (cpfExiste) {
+          throw new Error('CPF já está em uso por outro usuário');
         }
-      
+      }
+
       // Atualiza o usuário com as novas propriedades (se eles forem inseridos, se não erro)
       if (nome) user.nome = nome
       if (email) user.email = email

@@ -13,7 +13,7 @@ app.post("/users", async (req, res) => {
             return res.status(400).json({ error: "Os campos são obrigatórios" }) //mensagem enviada caso dê erro (nome ou email vazios)
         }
         const user = await userService.addUser(nome, email, senha, endereço, telefone, cpf) //toda vez q é AWAIT precisa ser async
-        res.status(200).json({ user })
+        res.status(200).json({ mensagem: "Usuário cadastrado com sucesso!" })
     } catch (erro) {
         res.status(401).json({ error: erro.message });
     }
