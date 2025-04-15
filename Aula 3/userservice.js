@@ -43,19 +43,13 @@ class userService {
   }
 
 
-  async addUser(nome, email, senha, endereço, telefone, cpf) { //função pra adicionar usuários (é async pq ela espera algo acontecer pra continuar)
+  async addUser(nome, email, senha, endereco, telefone, cpf) { //função pra adicionar usuários (é async pq ela espera algo acontecer pra continuar)
     try {
-
-      const checaCPF = this.users.some(user => user.cpf === cpf) //"some" retorna true ou false, se tiver algum user com o mesmo cpf, ele vai dar erro)
-      if (checaCPF) {  //se quando checar o cpf, e ele ja existir, ele vai dar erro
-        throw new Error('CPF já cadastrado')
-      }
       const senhacriptografada = await bcrypt.hash(senha, 10) //vai receber a senha e criptografar ela, e o 10 é o número de vezes que ele vai criptografar (await é q ele vai esperar a senha ser criptografada pra continuar, ou seja, só cria o user quando criptografar a senha)
-     
       const resultados = await mysql.execute(
-        `INSERT INTO usuários (Nome, Email, Senha, Endereço, Telefone, CPF)
-          VALUES('?', '?', '?', '?', '?', '?');`
-          [nome, email, senhacriptografada, endereço, telefone, cpf]
+        `INSERT INTO usuário (Nome, Email, Senha, Endereço, Telefone, CPF)
+                      VALUES (?, ?, ?, ?, ?, ?);`,
+          [nome, email, senhacriptografada, endereco, telefone, cpf]
       )
       return resultados
 
@@ -67,7 +61,12 @@ class userService {
 
   getUsers() { //função pra puxar usuários
     try {
-      return this.users
+      const puxa = mysql.execute(
+        `SELECT * FROM usuário;`,
+        [nome, email, senhacriptografada, endereco, telefone, cpf]
+      )
+      return puxa
+
     } catch (erro) {
       console.log('Erro ao chamar usuário', erro)
     }
@@ -75,42 +74,29 @@ class userService {
 
   deleteUser(id) { //função pra deletar usuários (ele deleta baseado no ID)
     try {
-      if (this.users.some(user => user.id === id)) { //se o usuário não existir, ele vai dar um erro
+      const deletar = mysql.execute(
+        `DELETE FROM usuário WHERE idusuário = ?;`, //deleta o usuário baseado no id
+        [id] //passa o id que foi passado na rota
+      )
+    return deletar
 
-        this.users = this.users.filter(user => user.id !== id)//filtra o usuário que eu quero deletar (filtra baseado em ID)
-        this.saveUsers() //salva denovo os usuários, agr com usuario deletado //vai mostrar a mensagem de erro
-      } else {
-        throw new Error('Usuário não encontrado') //mensagem de erro
-      }
     } catch (erro) {
       console.log('Erro ao deletar usuário', erro) //me avisa se der erro
     }
   }
 
 
-  putUser(id, nome, email, senha, endereço, telefone, cpf) {
+
+ async putUser(id, nome, email, senha, endereço, telefone, cpf) {
     try {
-      const user = this.users.find(user => user.id === id)
-      if (!user) throw new Error('Usuário não encontrado')
-
-      // função que checa se o cpf já existe 
-      if (cpf && cpf !== user.cpf) {
-        const cpfExiste = this.users.some(u => u.cpf === cpf && u.id !== id); //some e u são funções especiais do JS. pesquisar mais sobre dps (mas basicamente u faz ignorar id)
-        if (cpfExiste) {
-          throw new Error('CPF já está em uso por outro usuário');
-        }
-      }
-
-      // Atualiza o usuário com as novas propriedades (se eles forem inseridos, se não erro)
-      if (nome) user.nome = nome
-      if (email) user.email = email
-      if (senha) user.senha = senha
-      if (endereço) user.endereço = endereço
-      if (telefone) user.telefone = telefone
-      if (cpf) user.cpf = cpf
-
-      this.saveUsers()
-      return user
+      const senhacriptografada = await bcrypt.hash(senha, 10) //criptografa a senha
+      const edit = await mysql.execute( // chama o mysql pra ele ler um código sql (ai passo o codigo sql em baixo e depois passo os valores que eu quero)
+        `UPDATE usuário 
+        SET nome = ? , email = ? , senha = ? , endereço = ? , telefone = ? , cpf = ?
+        WHERE idusuário = ?;`,
+          [nome, email, senhacriptografada, endereço, telefone, cpf, id]
+      )
+        return edit 
     } catch (erro) {
       console.log('Erro ao editar usuário', erro)
       throw erro

@@ -11,13 +11,13 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
-USE `mydb` ;
+CREATE SCHEMA IF NOT EXISTS `aulasbackend` DEFAULT CHARACTER SET utf8 ;
+USE `aulasbackend` ;
 
 -- -----------------------------------------------------
 -- Table `mydb`.`usuário`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`usuário` (
+CREATE TABLE IF NOT EXISTS `aulasbackend`.`usuário` (
   `idusuário` INT NOT NULL AUTO_INCREMENT,
   `Nome` VARCHAR(255) NOT NULL,
   `Email` VARCHAR(255) NOT NULL,

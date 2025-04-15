@@ -1,11 +1,11 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
-const pool = mysql.createPool({ //conexão da database pelo workbench
+const pool = mysql.createConnection({ //conexão da database pelo workbench
     "user": "root",
     "password": "root",
-    "database": "Aulas Backend",
-    "host": "127.0.0.1",
-    "port": "3306"
+    "database": "aulasbackend",
+    "host": "localhost",
+    "port": "3307"
 })
 
 exports.execute = (query, param = [], varPool=pool) => {
