@@ -14,7 +14,7 @@ exports.execute = (query, param = [], varPool=pool) => {
             if(error){
                 reject(error)
             } else{
-                resolve(resolve)
+                resolve(results)
             }
         })
     }) 

@@ -21,16 +21,19 @@ app.post("/users", async (req, res) => {
 
 //rota pra listar todos os usuarios
 app.get("/users", (req, res) => {
-    res.json(userService.getUsers())
+    res.json(userService.getUser())
 })
 
 //rota para deletar usuários pelo ID
-app.delete("/users/:id", (req, res) => { //deletar users pelo parametro ID (esse parametro vai ser passado no postman na URL) (não é mais via body, é via params)
+app.delete("/users/:id", async (req, res) => { //deletar users pelo parametro ID (esse parametro vai ser passado no postman na URL) (não é mais via body, é via params)
     const id = parseInt(req.params.id) //pega o id que foi passado no parametro
 
     try {
-        userService.deleteUser(id)
-        res.status(200).json('Sucesso ao deletar usuário!') //retorna mensagem de sucesso DEVITO MUDOU AQUI
+        const deletar = await userService.deleteUser(id)
+        if (!deletar) {
+            return res.status(406).json({ error: "Usuário não encontrado" }) //caso o usuário não seja encontrado, retorna mensagem de erro
+        }
+        return res.status(200).json('Sucesso ao deletar usuário!') //retorna mensagem de sucesso
     } catch (erro) {
         res.status(401).json({ error: erro.message }); //retorna mensagem de erro
     }

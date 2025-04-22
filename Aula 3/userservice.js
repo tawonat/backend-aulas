@@ -22,27 +22,30 @@ class userService {
     }
   }
 
-  getUsers() { //função pra puxar usuários
+async getUser(id) { //função pra puxar usuário
     try {
-      const puxa = mysql.execute(
-        `SELECT * FROM usuário;`,
-        [nome, email, senhacriptografada, endereco, telefone, cpf]
+      const puxa = await mysql.execute(
+        `SELECT idusuário FROM usuário WHERE idusuário = ?;`,
+        [id] 
       )
       return puxa
-
     } catch (erro) {
       console.log('Erro ao chamar usuário', erro)
     }
   }
 
-  deleteUser(id) { //função pra deletar usuários (ele deleta baseado no ID)
+async deleteUser(id) { //função pra deletar usuários (ele deleta baseado no ID)
     try {
-      const deletar = mysql.execute(
-        `DELETE FROM usuário WHERE idusuário = ?;`, //deleta o usuário baseado no id
-        [id] //passa o id que foi passado na rota
+      const user = await this.getUser(id) 
+      if (user.length == 0) { 
+        console.log("Usuário não encontrado")
+        return;
+      }
+      const deletar = await mysql.execute(
+        `DELETE FROM usuário WHERE idusuário= ?`,
+        [id]
       )
-    return deletar
-
+      return deletar;
     } catch (erro) {
       console.log('Erro ao deletar usuário', erro) //me avisa se der erro
     }
@@ -68,3 +71,4 @@ class userService {
 }
 
 module.exports = new userService
+//pra dar commit, "git add." adiciona tudo, "git commit -m 'mensagem'" adiciona a mensagem e "git push" faz o upload do commit
